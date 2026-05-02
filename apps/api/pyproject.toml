@@ -16,4 +16,5 @@ dependencies = [
 ]
 
 [tool.setuptools]
+packages = ["scanners"]
 py-modules = ["main", "schema"]

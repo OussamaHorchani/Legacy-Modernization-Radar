@@ -1,3 +1,5 @@
+// /Users/oussama/dev/hackathon/Legacy-Modernization-Radar/apps/web/src/App.tsx
+
 import { useEffect, useState } from 'react'
 
 import type {
@@ -9,7 +11,9 @@ import type {
 } from './lib/types'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
-const DEFAULT_REPO_URL = 'https://github.com/spring-projects/spring-petclinic'
+const DEFAULT_REPO_URL =
+  'https://github.com/OussamaHorchani/spring-framework-petclinic'
+const DEFAULT_BRANCH = 'legacy-baseline'
 const PHASES: WorkstreamPhase[] = ['now', 'next', 'later']
 
 type AppScanStatus = 'idle' | 'started' | 'completed'
@@ -29,6 +33,7 @@ const severityStyles: Record<Hotspot['severity'], string> = {
 
 function App() {
   const [repoUrl, setRepoUrl] = useState(DEFAULT_REPO_URL)
+  const [branch, setBranch] = useState(DEFAULT_BRANCH)
   const [scanId, setScanId] = useState<string | null>(null)
   const [scanStatus, setScanStatus] = useState<AppScanStatus>('idle')
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
@@ -130,6 +135,7 @@ function App() {
 
   const handleScan = async () => {
     const trimmedRepoUrl = repoUrl.trim()
+    const trimmedBranch = branch.trim() || 'main'
     if (!trimmedRepoUrl) {
       setError('Enter a repository URL before starting a scan.')
       return
@@ -154,7 +160,7 @@ function App() {
           },
           body: JSON.stringify({
             repo_url: trimmedRepoUrl,
-            branch: 'main',
+            branch: trimmedBranch,
             scenario_id: null,
           }),
         },
@@ -214,26 +220,39 @@ function App() {
               </p>
             </div>
 
-            <div className="flex w-full flex-col gap-3 lg:max-w-3xl lg:flex-row">
-              <label className="sr-only" htmlFor="repo-url">
-                Repository URL
-              </label>
-              <input
-                id="repo-url"
-                type="url"
-                value={repoUrl}
-                onChange={(event) => setRepoUrl(event.target.value)}
-                placeholder="https://github.com/org/repo"
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30"
-              />
-              <button
-                type="button"
-                onClick={handleScan}
-                disabled={isScanning}
-                className="rounded-xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
-              >
-                {isScanning ? 'Scanning...' : 'Scan'}
-              </button>
+            <div className="flex w-full flex-col gap-3 lg:max-w-3xl">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <label className="sr-only" htmlFor="repo-url">
+                  Repository URL
+                </label>
+                <input
+                  id="repo-url"
+                  type="url"
+                  value={repoUrl}
+                  onChange={(event) => setRepoUrl(event.target.value)}
+                  placeholder="https://github.com/org/repo"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30"
+                />
+                <label className="sr-only" htmlFor="branch">
+                  Branch
+                </label>
+                <input
+                  id="branch"
+                  type="text"
+                  value={branch}
+                  onChange={(event) => setBranch(event.target.value)}
+                  placeholder="branch"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 sm:max-w-[14rem]"
+                />
+                <button
+                  type="button"
+                  onClick={handleScan}
+                  disabled={isScanning}
+                  className="rounded-xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+                >
+                  {isScanning ? 'Scanning...' : 'Scan'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -265,7 +284,7 @@ function App() {
                   Readiness Score
                 </h2>
                 <p className="mt-1 text-sm text-slate-400">
-                  Mock output from the current scan snapshot.
+                  Composite score across runtime, architecture, and quality risk.
                 </p>
               </div>
               {scanResult ? (
@@ -475,7 +494,7 @@ function App() {
                     Handoff Pack Preview
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Mock payload returned from the backend handoff endpoint.
+                    Structured prompt the Radar will send to IBM Bob for execution.
                   </p>
                 </div>
 

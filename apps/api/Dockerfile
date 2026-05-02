@@ -8,6 +8,7 @@ WORKDIR /app
 
 COPY pyproject.toml ./
 COPY main.py schema.py ./
+COPY scanners ./scanners
 
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
@@ -23,11 +24,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN addgroup --system app \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && addgroup --system app \
     && adduser --system --ingroup app app
 
 COPY --from=builder /opt/venv /opt/venv
 COPY main.py schema.py ./
+COPY scanners ./scanners
 
 USER app
 

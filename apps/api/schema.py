@@ -16,6 +16,8 @@ class Hotspot(BaseModel):
     summary: str
     affected_files: list[str] = Field(default_factory=list)
     recommended_action: str
+    cve_id: str | None = None
+    cvss_score: float | None = None
 
 
 class Workstream(BaseModel):
