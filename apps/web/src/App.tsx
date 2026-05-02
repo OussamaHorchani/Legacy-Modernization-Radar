@@ -302,6 +302,12 @@ function App() {
                 / 100
               </div>
             </div>
+
+            {scanResult?.executive_summary ? (
+              <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-300">
+                {scanResult.executive_summary}
+              </p>
+            ) : null}
           </section>
 
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
@@ -355,6 +361,14 @@ function App() {
                       <p className="mt-3 text-sm leading-6 text-slate-300">
                         {hotspot.summary}
                       </p>
+
+                      {hotspot.narrative ? (
+                        <div className="mt-4 border-t border-slate-800 pt-4">
+                          <p className="text-sm leading-6 text-slate-400 italic">
+                            {hotspot.narrative}
+                          </p>
+                        </div>
+                      ) : null}
 
                       <div className="mt-4 flex items-center justify-between text-sm text-slate-400">
                         <span className="capitalize">{hotspot.category}</span>
@@ -570,6 +584,12 @@ function RoadmapColumn({
           {phaseWorkstreams.length} workstream{phaseWorkstreams.length === 1 ? '' : 's'}
         </span>
       </div>
+
+      {phaseWorkstreams[0]?.rationale ? (
+        <p className="mt-3 text-sm leading-6 text-slate-400 italic">
+          {phaseWorkstreams[0].rationale}
+        </p>
+      ) : null}
 
       <div className="mt-4 space-y-4">
         {phaseWorkstreams.map((workstream) => (

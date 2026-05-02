@@ -12,9 +12,10 @@ dependencies = [
   "uvicorn[standard]",
   "pydantic>=2",
   "httpx",
+  "python-dotenv",
   "python-multipart",
 ]
 
 [tool.setuptools]
 packages = ["scanners"]
-py-modules = ["main", "schema"]
+py-modules = ["llm", "main", "schema"]

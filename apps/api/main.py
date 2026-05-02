@@ -1,11 +1,15 @@
+import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 from uuid import uuid4
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from llm import WatsonxUnavailable, generate_text, initialize_watsonx_client
 from scanners.runner import run_scan
 from schema import (
     ApproveResponse,
@@ -16,6 +20,9 @@ from schema import (
     ScanResult,
 )
 
+load_dotenv(Path(__file__).with_name(".env"))
+
+logger = logging.getLogger("uvicorn.error")
 PORT = int(os.getenv("PORT", "8080"))
 CORS_ORIGINS = [
     origin.strip()
@@ -62,6 +69,13 @@ def find_hotspot(hotspot_id: str) -> Hotspot | None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     print("Legacy Modernization Radar API starting up")
+    try:
+        initialize_watsonx_client()
+    except WatsonxUnavailable as exc:
+        logger.warning(
+            "watsonx.ai client unavailable during startup",
+            extra={"reason": str(exc)},
+        )
     yield
     print("Legacy Modernization Radar API shutting down gracefully")
 
@@ -80,6 +94,19 @@ app.add_middleware(
 @app.get("/health")
 async def health_check() -> dict[str, bool]:
     return {"ok": True}
+
+
+@app.get("/api/llm/health")
+def llm_health() -> dict[str, bool | str]:
+    try:
+        _ = generate_text("Say OK.", max_tokens=5)
+    except WatsonxUnavailable as exc:
+        return {
+            "watsonx_available": False,
+            "reason": str(exc),
+        }
+
+    return {"watsonx_available": True}
 
 
 @app.post("/api/scans", response_model=ScanCreateResponse)

@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY pyproject.toml ./
-COPY main.py schema.py ./
+COPY llm.py main.py schema.py ./
 COPY scanners ./scanners
 
 RUN python -m venv /opt/venv \
@@ -31,7 +31,7 @@ RUN apt-get update \
     && adduser --system --ingroup app app
 
 COPY --from=builder /opt/venv /opt/venv
-COPY main.py schema.py ./
+COPY llm.py main.py schema.py ./
 COPY scanners ./scanners
 
 USER app

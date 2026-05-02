@@ -1,5 +1,7 @@
+import logging
 from pathlib import Path
 
+from llm import WatsonxUnavailable, enrich_with_narratives
 from schema import Hotspot, ScanResult, Workstream
 
 from scanners import sort_hotspots
@@ -41,6 +43,8 @@ SEVERITY_PENALTIES = {
     "Low": 1,
 }
 
+logger = logging.getLogger("uvicorn.error")
+
 
 def run_scan(repo_url: str, branch: str) -> ScanResult:
     try:
@@ -65,25 +69,25 @@ def run_scan(repo_url: str, branch: str) -> ScanResult:
             workstreams=[],
         )
 
-    if not hotspots:
-        return ScanResult(
-            scan_id="",
-            repo_url=repo_url,
-            branch=branch,
-            readiness_score=100,
-            hotspots=[],
-            workstreams=[],
-        )
-
     ordered_hotspots = sort_hotspots(_dedupe_hotspots(hotspots))
-    return ScanResult(
+    result = ScanResult(
         scan_id="",
         repo_url=repo_url,
         branch=branch,
-        readiness_score=calculate_readiness(ordered_hotspots),
+        readiness_score=calculate_readiness(ordered_hotspots) if ordered_hotspots else 100,
         hotspots=ordered_hotspots,
         workstreams=group_into_workstreams(ordered_hotspots),
     )
+
+    try:
+        enrich_with_narratives(result)
+    except WatsonxUnavailable as exc:
+        logger.warning(
+            "watsonx.ai unavailable, returning deterministic result",
+            extra={"reason": str(exc)},
+        )
+
+    return result
 
 
 def calculate_readiness(hotspots: list[Hotspot]) -> int:

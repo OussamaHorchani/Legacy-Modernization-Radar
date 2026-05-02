@@ -11,6 +11,9 @@ export interface Hotspot {
   summary: string
   affected_files: string[]
   recommended_action: string
+  cve_id?: string | null
+  cvss_score?: number | null
+  narrative?: string | null
 }
 
 export interface Workstream {
@@ -18,6 +21,7 @@ export interface Workstream {
   hotspot_ids: string[]
   effort: string
   impact: string
+  rationale?: string | null
 }
 
 export interface ScanResult {
@@ -29,6 +33,7 @@ export interface ScanResult {
   readiness_score: number
   hotspots: Hotspot[]
   workstreams: Workstream[]
+  executive_summary?: string | null
 }
 
 export interface HandoffPack {

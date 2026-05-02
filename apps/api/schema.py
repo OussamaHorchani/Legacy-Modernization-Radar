@@ -18,6 +18,7 @@ class Hotspot(BaseModel):
     recommended_action: str
     cve_id: str | None = None
     cvss_score: float | None = None
+    narrative: str | None = None
 
 
 class Workstream(BaseModel):
@@ -25,6 +26,7 @@ class Workstream(BaseModel):
     hotspot_ids: list[str] = Field(default_factory=list)
     effort: str
     impact: str
+    rationale: str | None = None
 
 
 class ScanCreateRequest(BaseModel):
@@ -47,6 +49,7 @@ class ScanResult(BaseModel):
     readiness_score: int
     hotspots: list[Hotspot] = Field(default_factory=list)
     workstreams: list[Workstream] = Field(default_factory=list)
+    executive_summary: str | None = None
 
 
 class ApproveResponse(BaseModel):
