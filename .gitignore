@@ -6,5 +6,6 @@ __pycache__/
 .env.local
 .DS_Store
 .venv/
+*.egg-info/
 dist/
 build/

@@ -1,0 +1,21 @@
+services:
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      PORT: 8080
+      CORS_ORIGINS: http://localhost:5173,http://localhost:8081,*
+    ports:
+      - "8080:8080"
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        VITE_API_URL: http://localhost:8080
+    depends_on:
+      - api
+    environment:
+      PORT: 8080
+    ports:
+      - "8081:8080"
