@@ -44,11 +44,25 @@ SEVERITY_PENALTIES = {
 }
 
 logger = logging.getLogger("uvicorn.error")
+NON_JAVA_REPO_SUMMARY = (
+    "This repository does not appear to be a Java project. "
+    "The Radar's current detectors only support Java codebases."
+)
 
 
 def run_scan(repo_url: str, branch: str) -> ScanResult:
     try:
         with shallow_clone(repo_url, branch) as repo_path:
+            if not _has_java_files(repo_path):
+                return ScanResult(
+                    scan_id="",
+                    repo_url=repo_url,
+                    branch=branch,
+                    readiness_score=0,
+                    hotspots=[],
+                    workstreams=[],
+                    executive_summary=NON_JAVA_REPO_SUMMARY,
+                )
             hotspots = _run_detectors(repo_path)
     except CloneError:
         return ScanResult(
@@ -126,7 +140,12 @@ def _run_detectors(repo_path: Path) -> list[Hotspot]:
     for detector in (scan_dependencies, scan_test_coverage, scan_complex_methods):
         try:
             hotspots.extend(detector(repo_path))
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "detector %s failed: %s",
+                detector.__name__,
+                exc,
+            )
             continue
     return hotspots
 
@@ -136,3 +155,7 @@ def _dedupe_hotspots(hotspots: list[Hotspot]) -> list[Hotspot]:
     for hotspot in hotspots:
         unique[hotspot.id] = hotspot
     return list(unique.values())
+
+
+def _has_java_files(repo_path: Path) -> bool:
+    return next(repo_path.rglob("*.java"), None) is not None

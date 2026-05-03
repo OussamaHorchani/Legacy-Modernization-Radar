@@ -10,6 +10,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from llm import WatsonxUnavailable, generate_text, initialize_watsonx_client
+from scanners.clone import CloneError, validate_clone_inputs
 from scanners.runner import run_scan
 from schema import (
     ApproveResponse,
@@ -111,6 +112,11 @@ def llm_health() -> dict[str, bool | str]:
 
 @app.post("/api/scans", response_model=ScanCreateResponse)
 async def create_scan(request: ScanCreateRequest) -> ScanCreateResponse:
+    try:
+        validate_clone_inputs(request.repo_url, request.branch)
+    except CloneError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     scan_id = str(uuid4())
     scan_result = run_scan(request.repo_url, request.branch).model_copy(
         update={
